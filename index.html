@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayong</title>
+    <style>
+        /* Atur agar semua konten berada di tengah */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+
+        /* Atur container utama */
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            /*background-image: url('alikhlas.JPEG');
+            background-size: 100%;*/
+        }
+
+        /* Judul utama */
+        h1 {
+            font-size: 2.5em;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        /* Teks hasil */
+        #result {
+            font-size: 20em;
+            color: #007BFF;
+            font-weight: bold;
+            margin:0%;
+        }
+
+        /* Teks user ID 
+        #userId {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #555555;
+            font-style: italic;
+        }*/
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p id="result">Memuat angka...</p>
+        <p id="userId"></p>
+    </div>
+
+    <script>
+        // Fungsi untuk mendapatkan angka unik
+        function getUniqueNumber() {
+            // Cek apakah User ID sudah ada di localStorage
+            let userId = localStorage.getItem('user_id');
+            if (!userId) {
+                // Generate User ID baru jika belum ada
+                userId = crypto.randomUUID();
+                localStorage.setItem('user_id', userId);
+            }
+
+            // Fetch angka dari backend menggunakan User ID
+            fetch("http://localhost:3000/get-number", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: userId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.number && data.userId) {
+                    document.getElementById("result").innerText = `${data.number}`;
+                } else {
+                    document.getElementById("result").innerText = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("result").innerText = `Error: ${error.message}`;
+                console.error("Fetch error:", error);
+            });
+        }
+
+        // Panggil fungsi saat halaman dimuat
+        window.onload = getUniqueNumber;
+    </script>
+</body>
+</html>
